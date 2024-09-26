@@ -10,7 +10,19 @@ namespace {
 struct SkeletonPass : public PassInfoMixin<SkeletonPass> {
     PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM) {
         for (auto &F : M) {
-            errs() << "I saw a function called " << F.getName() << "!\n";
+			for (auto &B : F) {
+				for (auto &I : B) {
+					if (auto* op = dyn_cast<BinaryOperator>(&I)) {
+						IRBuilder<> builder(op);
+						if ( op->getOpcode() == Instruction::UDiv ||
+							 op->getOpcode() == Instruction::SDiv ||
+							 op->getOpcode() == Instruction::FDiv
+						   ) {
+							errs() << "Instruction: " << I << "\n";
+						}
+					}
+				}
+			}
         }
         return PreservedAnalyses::all();
     };
